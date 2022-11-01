@@ -17,13 +17,13 @@ Pet-project
 Clone the project via https
 
 ```bash
-git clone https://github.com/SerHappy/Shh_bot.git
+git clone https://github.com/SerHappy/shh_bot.git
 ```
 
 Or via SSH
 
 ```bash
-git clone git@github.com:SerHappy/Shh_bot.git
+git clone git@github.com:SerHappy/shh_bot.git
 ```
 
 Go to the project directory
