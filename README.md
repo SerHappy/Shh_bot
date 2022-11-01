@@ -44,6 +44,14 @@ Install requirements.txt
 pip install -r requirements.txt
 ```
 
+Rename env_example to .env and fill fields
+
+Install requirements.txt
+
+```bash
+pip install -r requirements.txt
+```
+
 Run bot
 
 ```bash
