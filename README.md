@@ -29,7 +29,7 @@ git clone git@github.com:SerHappy/Shh_bot.git
 Go to the project directory
 
 ```bash
-cd Shh_bot
+cd shh_bot
 ```
 
 Create virtual environment
