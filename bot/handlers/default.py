@@ -1,18 +1,14 @@
-import logging
-
 from aiogram import Dispatcher, types
+from utils.decorators import log_message
 
 from utils.default import filter_obscene_words, is_user_banned
 
 __all__ = ["register_default_handlers"]
 
 
-# @log_message
-async def message_processing(message: types.Message):
+@log_message
+async def message_processing(message: types.Message, **kwargs):
     """Handle all non-admin messages"""
-
-    message_logger = logging.getLogger("message_logger")
-    message_logger.debug(f"Message: {message}")
 
     if await is_user_banned(message):
         await message.delete()

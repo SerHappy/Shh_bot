@@ -89,13 +89,13 @@ async def create_loggers() -> None:
 
     # Register info logger
     info_logger = logging.getLogger("info_logger")
-    info_logger.setLevel(logging.INFO)
+    info_logger.setLevel(logging.DEBUG)
 
     # Create file handler for info logger
     info_handler = logging.FileHandler(
         encoding="utf-8", filename=config("INFO_LOG_PATH")
     )
-    info_handler.setLevel(logging.INFO)
+    info_handler.setLevel(logging.DEBUG)
 
     # Add formatter to handler
     info_handler.setFormatter(formatter)

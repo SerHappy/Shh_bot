@@ -1,9 +1,14 @@
 import asyncio
 import logging
+import nest_asyncio
 import os
 
-import nest_asyncio
 from aiogram import executor
+from aiogram import Bot, Dispatcher
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+
+from decouple import config
+
 from utils.files import load_admins_to_config
 from utils.before_start import (
     check_bot_permisions,
@@ -14,9 +19,7 @@ from utils.before_start import (
 )
 from handlers.admin import register_admin_handlers
 from handlers.default import register_default_handlers
-from aiogram import Bot, Dispatcher
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from decouple import config
+
 
 
 async def _on_startup(dp: Dispatcher) -> None:

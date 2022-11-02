@@ -29,14 +29,11 @@ from utils.admin import (
 __all__ = ["register_admin_handlers"]
 
 
-# @log_message
+@log_message
 @private_chat_only
 @admin_required
-async def admin_fsm_words_start(message: types.Message) -> None:
+async def admin_fsm_words_start(message: types.Message, **kwargs) -> None:
     """Start admin FSM for add banwords"""
-
-    message_logger = logging.getLogger("message_logger")
-    message_logger.debug(f"Message: {message}")
 
     await message.answer(
         "Выберите действие\n1. Вывести пользовательские слова\n2. Добавить слово\n3. Удалить слово"
@@ -44,16 +41,13 @@ async def admin_fsm_words_start(message: types.Message) -> None:
     await FSM_Admin_word.value.set()
 
 
-# @log_message
-async def check_value_word(message: types.Message, state=FSMContext) -> None:
+@log_message
+async def check_value_word(message: types.Message, **kwargs) -> None:
     """Check value for admin add word FSM"""
-
-    message_logger = logging.getLogger("message_logger")
-    message_logger.debug(f"Message: {message}")
 
     if message.text == "1":
         await FSM_Admin_word.print_custom_banwords.set()
-        await print_custom_banwords(message, state)
+        await print_custom_banwords(message, **kwargs)
     elif message.text == "2":
         await message.answer(f"Введите слово для добавления")
         await FSM_Admin_word.add_custom_banword.set()
@@ -64,12 +58,11 @@ async def check_value_word(message: types.Message, state=FSMContext) -> None:
         await message.answer(f"Неверное значение")
 
 
-# @log_message
-async def add_ban_word(message: types.Message, state=FSMContext) -> None:
+@log_message
+async def add_ban_word(message: types.Message, **kwargs) -> None:
     """Add ban word to json banword"""
 
-    message_logger = logging.getLogger("message_logger")
-    message_logger.debug(f"Message: {message}")
+    state = kwargs["state"]
 
     await add_word_to_file(config("CUSTOM_TXT_BANWORD_PATH"), message.text)
     await update_json_banlist()
@@ -77,12 +70,11 @@ async def add_ban_word(message: types.Message, state=FSMContext) -> None:
     await finish_fsm(state)
 
 
-# @log_message
-async def delete_ban_word(message: types.Message, state=FSMContext) -> None:
+@log_message
+async def delete_ban_word(message: types.Message, **kwargs) -> None:
     """Delete ban word from json banword"""
 
-    message_logger = logging.getLogger("message_logger")
-    message_logger.debug(f"Message: {message}")
+    state = kwargs["state"]
 
     find = False
     words = await get_txt(config("CUSTOM_TXT_BANWORD_PATH"))
@@ -97,26 +89,21 @@ async def delete_ban_word(message: types.Message, state=FSMContext) -> None:
     await finish_fsm(state)
 
 
-# @log_message
-async def print_custom_banwords(message: types.Message, state=FSMContext) -> None:
+async def print_custom_banwords(message: types.Message, **kwargs) -> None:
     """Print add banwords"""
 
-    message_logger = logging.getLogger("message_logger")
-    message_logger.debug(f"Message: {message}")
+    state = kwargs["state"]
 
     banWords = await get_txt(config("CUSTOM_TXT_BANWORD_PATH"))
     await message.answer(f"Добавленные слова:\n{', '.join(i for i in banWords)}")
     await finish_fsm(state)
 
 
+@log_message
 @private_chat_only
 @admin_required
-# @log_message
-async def admin_fsm_silent_ban_start(message: types.Message) -> None:
+async def admin_fsm_silent_ban_start(message: types.Message, **kwargs) -> None:
     """Start admin FSM for silent ban"""
-
-    message_logger = logging.getLogger("message_logger")
-    message_logger.debug(f"Message: {message}")
 
     await message.answer(
         "Выберите действие\n1. Забанить пользователя\n2. Разбанить пользователя\n3. Очистить список забаненных пользователей\n4. Вывести список забаненых пользователей"
@@ -124,12 +111,11 @@ async def admin_fsm_silent_ban_start(message: types.Message) -> None:
     await FSM_Admin_silent_ban.value.set()
 
 
-# @log_message
-async def check_value_silent_ban(message: types.Message, state=FSMContext) -> None:
+@log_message
+async def check_value_silent_ban(message: types.Message, **kwargs) -> None:
     """Check value for admin silent ban FSM"""
 
-    message_logger = logging.getLogger("message_logger")
-    message_logger.debug(f"Message: {message}")
+    state = kwargs["state"]
 
     if message.text == "1":
         await message.answer(
@@ -143,20 +129,21 @@ async def check_value_silent_ban(message: types.Message, state=FSMContext) -> No
         await FSM_Admin_silent_ban.silent_unban.set()
     elif message.text == "3":
         await FSM_Admin_silent_ban.clear_silent_ban_users.set()
-        await clear_silent_ban_users(message, state)
+        await clear_silent_ban_users(message, **kwargs)
     elif message.text == "4":
         await FSM_Admin_silent_ban.print_silent_ban_users.set()
-        await print_silent_ban_users(message, state)
+        await print_silent_ban_users(message, **kwargs)
     else:
         await message.answer(f"Неверное значение")
 
 
-# @log_message
-async def silent_ban_user(message: types.Message, state=FSMContext) -> None:
+@log_message
+async def silent_ban_user(message: types.Message, **kwargs) -> None:
     """Hander to add user to silent ban by id,username or fullname"""
 
-    message_logger = logging.getLogger("message_logger")
-    message_logger.debug(f"Message: {message}")
+    state = kwargs["state"]
+
+    info_logger = logging.getLogger("info_logger")
 
     # Get template and variable list from message
     try:
@@ -168,7 +155,7 @@ async def silent_ban_user(message: types.Message, state=FSMContext) -> None:
         )
         variable_list = lst[0].split(" ")
     except (ValueError, IndexError):
-        logging.error(
+        info_logger.error(
             f"Message id:{message.message_id}. Неверный шаблон для бана пользователя: {message.text}"
         )
         await message.answer("Неверный шаблон!")
@@ -184,7 +171,7 @@ async def silent_ban_user(message: types.Message, state=FSMContext) -> None:
                 username = username[1:] if username.startswith("@") else username
                 await silent_ban_user_by_username(username, message)
             except (IndexError, ValueError) as e:
-                logging.error(
+                info_logger.error(
                     f"Message id:{message.message_id}. Неверный username для бана пользователя: {message.text}"
                 )
                 await message.answer(f"Неверный username\nException: {e}")
@@ -196,7 +183,7 @@ async def silent_ban_user(message: types.Message, state=FSMContext) -> None:
                 user_id = int(variable_list[0])
                 await silent_ban_user_by_id(user_id, message)
             except ValueError as e:
-                logging.error(
+                info_logger.error(
                     f"Message id:{message.message_id}. Неверный id для бана пользователя: {message.text}"
                 )
                 await message.answer(f"Неверный тип параметра id\nException: {e}")
@@ -208,7 +195,7 @@ async def silent_ban_user(message: types.Message, state=FSMContext) -> None:
                 fullname = variable_list
                 await silent_ban_user_by_fullname(fullname, message)
             except ValueError as e:
-                logging.error(
+                info_logger.error(
                     f"Message id:{message.message_id}. Неверное имя для бана пользователя: {message.text}"
                 )
                 await message.answer(f"Неверный тип параметра fullname\nException: {e}")
@@ -219,12 +206,13 @@ async def silent_ban_user(message: types.Message, state=FSMContext) -> None:
     await finish_fsm(state)
 
 
-# @log_message
-async def silent_unban_user(message: types.Message, state=FSMContext) -> None:
+@log_message
+async def silent_unban_user(message: types.Message, **kwargs) -> None:
     """Hander for silent unban user by id, username or fullname"""
 
-    message_logger = logging.getLogger("message_logger")
-    message_logger.debug(f"Message: {message}")
+    state = kwargs["state"]
+
+    info_logger = logging.getLogger("info_logger")
 
     # Get template and variable list from message
     try:
@@ -236,7 +224,7 @@ async def silent_unban_user(message: types.Message, state=FSMContext) -> None:
         )
         variable_list = lst[0].split(" ")
     except (ValueError, IndexError):
-        logging.error(
+        info_logger.error(
             f"Message id:{message.message_id}. Неверный шаблон для разбана пользователя: {message.text}"
         )
         await message.answer("Неверный шаблон!")
@@ -252,7 +240,7 @@ async def silent_unban_user(message: types.Message, state=FSMContext) -> None:
                 username = username[1:] if username.startswith("@") else username
                 await silent_unban_user_by_username(username, message)
             except (IndexError, ValueError) as e:
-                logging.error(
+                info_logger.error(
                     f"Message id:{message.message_id}. Неверный username для разбана пользователя: {message.text}"
                 )
                 await message.answer(f"Неверный username\nException: {e}")
@@ -264,7 +252,7 @@ async def silent_unban_user(message: types.Message, state=FSMContext) -> None:
                 user_id = int(variable_list[0])
                 await silent_unban_user_by_id(user_id, message)
             except ValueError as e:
-                logging.error(
+                info_logger.error(
                     f"Message id:{message.message_id}. Неверный id для разбана пользователя: {message.text}"
                 )
                 await message.answer(f"Неверный тип параметра id\nException: {e}")
@@ -276,7 +264,7 @@ async def silent_unban_user(message: types.Message, state=FSMContext) -> None:
                 fullname = variable_list
                 await silent_unban_user_by_fullname(fullname, message)
             except ValueError as e:
-                logging.error(
+                info_logger.error(
                     f"Message id:{message.message_id}. Неверное имя для разбана пользователя: {message.text}"
                 )
                 await message.answer(f"Неверный тип параметра fullname\nException: {e}")
@@ -289,23 +277,19 @@ async def silent_unban_user(message: types.Message, state=FSMContext) -> None:
     await finish_fsm(state)
 
 
-# @log_message
-async def clear_silent_ban_users(message: types.Message, state=FSMContext) -> None:
+async def clear_silent_ban_users(message: types.Message, **kwargs) -> None:
     """Hander for clear silent ban users"""
 
-    message_logger = logging.getLogger("message_logger")
-    message_logger.debug(f"Message: {message}")
+    state = kwargs["state"]
 
     await delete_all_silent_ban_users(message)
     await finish_fsm(state)
 
 
-# @log_message
-async def print_silent_ban_users(message: types.Message, state=FSMContext) -> None:
+async def print_silent_ban_users(message: types.Message, **kwargs) -> None:
     """Hander for print silent ban users"""
 
-    message_logger = logging.getLogger("message_logger")
-    message_logger.debug(f"Message: {message}")
+    state = kwargs["state"]
 
     # Get dict of silent ban users
     users = await get_silent_ban_dict()
@@ -323,7 +307,7 @@ async def print_silent_ban_users(message: types.Message, state=FSMContext) -> No
 def register_admin_handlers(dp: Dispatcher) -> None:
     """Register admin handlers"""
 
-    dp.register_message_handler(admin_fsm_words_start, commands=["word"])
+    dp.register_message_handler(admin_fsm_words_start, commands=["word"], state="*")
     dp.register_message_handler(check_value_word, state=FSM_Admin_word.value)
     dp.register_message_handler(add_ban_word, state=FSM_Admin_word.add_custom_banword)
     dp.register_message_handler(

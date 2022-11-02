@@ -6,11 +6,14 @@ __all__ = ["log_message", "admin_required"]
 
 
 def log_message(func):
-    def wrapper(message: types.Message):
-        print(message)
+    """Decorator to log message"""
+
+    async def wrapper(*args, **kwargs):
+        message: types.Message = args[0]
+
         message_logger = logging.getLogger("message_logger")
         message_logger.debug(f"Message: {message}")
-        func(message)
+        await func(*args, **kwargs)
 
     return wrapper
 
@@ -18,9 +21,8 @@ def log_message(func):
 def non_bot_required(func):
     """Decorator to check if user is not bot"""
 
-    async def wrapper(message: types.Message):
-        # message_logger = logging.getLogger("message_logger")
-        # message_logger.debug(f"Message: {message}")
+    async def wrapper(*args, **kwargs):
+        message: types.Message = args[0]
 
         if message.from_user.is_bot:
             info_logger = logging.getLogger("info_logger")
@@ -28,7 +30,7 @@ def non_bot_required(func):
                 f"Bot with id {message.from_user.id} wrote a message in Chat id: {message.chat.id}, skip it. Message id: {message.message_id}"
             )
             return
-        return await func(message)
+        return await func(*args, **kwargs)
 
     return wrapper
 
@@ -36,13 +38,11 @@ def non_bot_required(func):
 def admin_required(func):
     """Decorator to check if user is admin"""
 
-    async def wrapper(message: types.Message):
+    async def wrapper(*args, **kwargs):
+        message: types.Message = args[0]
 
         admins_list = await get_admins_from_config()
         if message.from_user.id not in admins_list:
-
-            message_logger = logging.getLogger("message_logger")
-            message_logger.debug(f"Message: {message}")
 
             info_logger = logging.getLogger("info_logger")
             info_logger.info(
@@ -51,7 +51,7 @@ def admin_required(func):
 
             return await message.answer(f"{message.from_user.first_name}, ты не админ!")
 
-        return await func(message)
+        return await func(*args, **kwargs)
 
     return wrapper
 
@@ -59,12 +59,10 @@ def admin_required(func):
 def private_chat_only(func):
     """Decorator to check if user writes in private chat"""
 
-    async def wrapper(message: types.Message):
+    async def wrapper(*args, **kwargs):
+        message: types.Message = args[0]
 
         if message.chat.type != types.ChatType.PRIVATE:
-
-            message_logger = logging.getLogger("message_logger")
-            message_logger.debug(f"Message: {message}")
 
             info_logger = logging.getLogger("info_logger")
             info_logger.info(
@@ -73,6 +71,6 @@ def private_chat_only(func):
             return await message.answer(
                 f"{message.from_user.first_name}, я не обрабатываю личные сообщения в группах!"
             )
-        return await func(message)
+        return await func(*args, **kwargs)
 
     return wrapper

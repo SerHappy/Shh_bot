@@ -97,6 +97,7 @@ async def _silent_unban_user(
 async def finish_fsm(state=FSMContext) -> None:
     """Cansels current state"""
 
+    
     current_state = await state.get_state()
     if current_state is not None:
 
@@ -184,7 +185,7 @@ async def delete_all_silent_ban_users(message: types.Message) -> None:
     """Deletes all silent ban users"""
 
     cfg = await get_json(config("JSON_CONFIG_PATH"))
-    cfg["silent_ban_users"] = {"id": [], "username": [], "first_name": []}
+    cfg["silent_ban_users"] = {"id": [], "username": [], "fullname": []}
 
     await dump_json(config("JSON_CONFIG_PATH"), "w", cfg)
 
