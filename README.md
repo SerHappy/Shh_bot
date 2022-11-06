@@ -2,6 +2,11 @@
 
 Pet-project
 
+## Используемый стэк
+- aiogram - asynchronous framework for Telegram Bot API
+- json - build-in python module
+- python-decouple - strict separation of settings from code
+
 ## Функции на данный момент
 
 - Удаление слов, содержащих мат и кастомные слова.
